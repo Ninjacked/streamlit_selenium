@@ -102,26 +102,27 @@ if uploaded_file:
                     series_list.append(df_mapped[src].astype(str).replace('nan', ''))
                 else:
                     series_list.append(pd.Series([''] * len(df_mapped), index=df_mapped.index))
-            df_mapped[target_col] = pd.Series(separator.join(filter(None, parts)) 
-                                               for parts in zip(*series_list))
+            
+            # Fix: row-wise join using pandas apply
+            temp_df = pd.concat(series_list, axis=1)
+            temp_df = temp_df.fillna('').astype(str)
+            df_mapped[target_col] = temp_df.apply(
+                lambda row: separator.join(row[row != '']), axis=1
+            )
 
         elif col_type == "if_gt_zero":
             value_col = spec.get("value_column")
             date_col = spec.get("date_column")
             fmt = spec.get("format")
             if value_col and date_col and fmt and value_col in df_mapped.columns and date_col in df_mapped.columns:
-                # Convert value column to numeric, coerce errors to NaN
                 values = pd.to_numeric(df_mapped[value_col], errors='coerce')
-                # Convert date column to datetime
                 dates = pd.to_datetime(df_mapped[date_col], errors='coerce')
-                # Where values > 0, format the date; else empty string
                 formatted = dates.dt.strftime(fmt).where(values > 0, '')
                 df_mapped[target_col] = formatted.fillna('')
             else:
                 df_mapped[target_col] = ''
 
         else:
-            # Unknown type: create empty column
             df_mapped[target_col] = ''
 
     # --- Cleaning Functions ---
