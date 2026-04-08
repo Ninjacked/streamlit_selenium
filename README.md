@@ -27,6 +27,26 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+## Environment (MySQL)
+
+Copy `.env.example` to `.env` and fill in your MySQL credentials:
+
+```bash
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=your_user
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=your_database
+```
+
+The helper `db.py` loads these variables automatically via `python-dotenv`:
+
+```python
+from db import get_mysql_connection
+
+conn = get_mysql_connection()
+```
+
 ## Run
 
 ```bash
